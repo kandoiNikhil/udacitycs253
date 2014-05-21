@@ -1,0 +1,5 @@
+select e.ename ||' is a ' || e.job ||' in dept ' || d.dname || ' earns ' || e.sal as Employee_Defination from emp e, dept d where e.deptno=d.deptno;
+
+select ename||'->'||job emp_job ,ename||'->'||sal emp_sal from emp;
+
+select d.dname,e.ename from dept d left outer join (select * from emp where job = 'MANAGER') e on e.deptno=d.deptno ;

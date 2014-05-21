@@ -1,0 +1,24 @@
+<html>
+<head><title>CS 253 BLOG</title></head>
+<body>
+<h1> new post</h1>
+<form method="post">
+<label>
+<div>subject</div>
+<input type="text" name="subject" value="{{subject}}">
+</label>
+<br>
+<br>
+<label>
+<div>blog</div>
+<textarea class="blog" name="blog">{{blog}}</textarea>
+</label>
+<input type="submit" name="submit">
+</form>
+<br>
+<br>
+<div class="error">
+{{error}}
+</div>
+</body>
+</html>

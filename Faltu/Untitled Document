@@ -1,0 +1,16 @@
+create or replace function process_emp_stop() returns TRIGGER
+AS $$
+declare
+hour integer;
+	BEGIN
+		if (TG_OP ='INSERT') then
+			if(select extract(hour from now())>16) then
+			raise exception 'NO insert allowed after 4 PM';
+			end if;
+		end if;
+	end;
+$$ LANGUAGE plpgsql;
+
+create TRIGGER emp_stop
+AFTER INSERT ON emp_trg
+	FOR EACH ROW EXECUTE PROCEDURE process_emp_stop();

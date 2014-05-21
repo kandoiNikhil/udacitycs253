@@ -1,0 +1,28 @@
+create or replace function emp_cur() returns void as
+$$   
+declare 
+salary emp.sal%type;
+emp_no emp.empno%type;
+commision emp.comm%type;
+i record;
+begin 
+for i in select empno,sal from emp
+loop
+salary:=i.sal;
+emp_no:=i.empno;
+
+if salary<500 then commision:=0;
+elsif salary>500 and salary<1000 then commision:=100;
+elsif salary>1000 and salary <2000 then commision:=200;
+elsif salary>2000 and salary<3000 then commision:=300;
+else commision:=400;
+end if;
+
+update emp set comm=commision where empno=emp_no;
+
+exit when emp_no is null;	
+
+end loop;
+end;
+$$ language plpgsql;
+select emp_cur();

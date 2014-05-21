@@ -1,0 +1,73 @@
+import os
+import re
+from string import letters
+import webapp2
+import jinja2
+from google.appengine.ext import db
+import json
+from google.appengine.api import memcache
+import time
+import logging
+
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+                               autoescape = True)
+class Handler(webapp2.RequestHandler):
+	def render(self, template, **kw):
+        	self.response.out.write(self.render_str(template, **kw))
+	def render_str(self,template, **params):
+		t = jinja_env.get_template(template)
+		return t.render(params)
+	def write(self, *a, **kw):
+		self.response.out.write(*a, **kw)
+
+class Blog(db.Model):
+	subject= db.TextProperty(required=True)
+	content=db.TextProperty(required=True)
+	created=db.DateTimeProperty(auto_now_add= True)
+
+class MainPage(Handler):
+	def get(self):
+		blogs = memcache.get('top')
+		if not blogs:
+			blogs = db.GqlQuery("select * from Blog order by created DESC")	
+			memcache.set('top',blogs)
+			millis =int(round(time.time()*1000))
+			memcache.set('last_time',millis)
+		now = int(round(time.time()*1000))
+		last_update = memcache.get('last_time')
+		diff = (now - last_update)/1000;
+		self.render("index.html",blogs=blogs,last_time=diff)
+
+class NewPost(Handler):
+	def get(self):
+		self.render("newpost.html",subject="",content="",error="")
+	def post(self):
+		subject = self.request.get("subject")
+		content = self.request.get("content")
+		if subject and content:
+			blog = Blog(subject=subject,content=content)	
+			b_key = blog.put() # Key('Blog', id)
+			blogs = db.GqlQuery("select * from Blog order by created DESC")
+			memcache.set('top',blogs)
+			#millis =int(round(time.time()*1000))
+			#memcache.set('last_time',millis)
+			url="http://localhost:8080/"+str(b_key.id())
+			self.redirect('/blog/%s'%str(b_key.id()))	
+		else:
+			error="Error : We need both the Title and Content of the blog"
+			self.render("newpost.html",subject=subject,content=content,error=error)	
+
+class Permalink(Handler):
+	def get(self,blog_id):
+		blog=Blog.get_by_id(int(blog_id))
+		self.render("permalink.html",blog=blog)
+
+class MainPageJson(Handler):
+	def get(self):
+		blogs = db.GqlQuery("Select * from Blog order by created desc")
+		json_str=''
+		for blog in blogs:
+			json_str='{"content":%s,"subject":%s}'%(blog.content,blog.subject)						
+
+app=webapp2.WSGIApplication([('/blog', MainPage),('/blog/newpost',NewPost),('/blog/(\d+)',Permalink)], debug = True)

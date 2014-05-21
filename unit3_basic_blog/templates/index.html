@@ -1,0 +1,20 @@
+<html>
+<head
+<title>CS-Udacity Basic Blog Building homework</title>
+</head>
+<body>
+<h1>CS 253 Blog</h1>
+<hr>
+{% for blog in blogs%}
+<div class="blog">
+<div class="blog-subject">{{blog.subject}}</div>
+<hr>
+<div class="blog-content">{{blog.content}}</div>
+<br><br>
+</div>
+{% endfor %}
+<br>
+<div class="time-info">Queried {{last_time}} seconds ago
+</div>
+</body>
+</html>

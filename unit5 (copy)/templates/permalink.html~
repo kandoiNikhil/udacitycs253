@@ -1,0 +1,13 @@
+<html>
+<head
+<title>CS-Udacity Basic Blog Building homework</title>
+</head>
+<body>
+<hr>
+<div class="blog">
+<div class="blog-subject">{{blog.subject}}</div>
+<hr>
+<div class="blog-content">{{blog.content}}</div>
+</div>
+</body>
+</html>
